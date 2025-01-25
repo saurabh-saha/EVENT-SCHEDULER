@@ -1,59 +1,97 @@
-# EVENT-SCHEDULER
+# Scheduler and Conference Manager Readme
 
-The conference has multiple tracks each of which has a morning and afternoon session.
-Each session contains multiple talks.
-Morning sessions begin at 9am and must finish by 12 noon, for lunch.
-Afternoon sessions begin at 1pm and must finish in time for the networking event.
-The networking event can start no earlier than 4:00 and no later than 5:00.
-No talk title has numbers in it.
-All talk lengths are either in minutes (not hours) or lightning (5 minutes).
-Presenters will be very punctual; there needs to be no gap between sessions.
+## Overview
+This document describes the implementation of a Conference Scheduler written in Python. The scheduler organizes events into morning and evening sessions based on their durations and predefined time constraints.
 
-Test input:
+## 1. Core Components
+### Classes
+#### 1.1 Event
+The `Event` class represents an individual talk or session.
+
+**Attributes:**
+- `name`: The title of the event.
+- `duration`: The duration of the event in minutes.
+- `scheduled`: A boolean indicating whether the event has been scheduled.
+
+**Methods:**
+- `__repr__`: Returns the name of the event for easy readability.
+
+#### 1.2 Slot
+The `Slot` class defines a time slot for scheduling events.
+
+**Attributes:**
+- `max`: Maximum duration allowed for the slot.
+- `min`: Minimum duration required for the slot (default is 0).
+
+**Methods:**
+- `isValidEvent(event, totaltime)`: Checks if an event can fit in the slot given the current total time.
+- `isValidSession(totaltime)`: Checks if the total time for the session is valid based on the slot's constraints.
+
+#### 1.3 ConferenceManager
+The `ConferenceManager` class handles reading events, scheduling them into sessions, and printing the final schedule.
+
+**Attributes:**
+- `talk_list`: A list of `Event` objects created from the input file.
+- `morning`: Scheduled events for the morning sessions.
+- `evening`: Scheduled events for the evening sessions.
+- `perday`: Total available time per day in minutes (7 hours).
+
+**Methods:**
+- `__init__(file)`: Reads the input file and initializes the `talk_list`.
+- `readInput(file)`: Parses the input file and creates `Event` objects.
+- `totaltime(talk_list)`: Calculates the total time required for the list of events.
+- `clear(slot_list)`: Removes scheduled events from the `talk_list`.
+- `schedule(talk_list)`: Schedules events into morning and evening sessions.
+- `combinations(event_list, possibledays, slot)`: Finds valid combinations of events for a given slot.
+- `print_output()`: Prints the final schedule in a readable format.
+
+## 2. Usage
+### Input Format
+The input file should contain a list of events, each with a title and duration in minutes (e.g., `60min`). If the event duration is not specified, it is assumed to be a lightning talk of 5 minutes.
+
+### Example Input
+```
 Writing Fast Tests Against Enterprise Rails 60min
 Overdoing it in Python 45min
 Lua for the Masses 30min
 Ruby Errors from Mismatched Gem Versions 45min
-Common Ruby Errors 45min
 Rails for Python Developers lightning
-Communicating Over Distance 60min
-Accounting-Driven Development 45min
-Woah 30min
-Sit Down and Write 30min
-Pair Programming vs Noise 45min
-Rails Magic 60min
-Ruby on Rails: Why We Should Move On 60min
-Clojure Ate Scala (on my project) 45min
-Programming in the Boondocks of Seattle 30min
-Ruby vs. Clojure for Back-End Development 30min
-Ruby on Rails Legacy App Maintenance 60min
-A World Without HackerNews 30min
-User Interface CSS in Rails Apps 30min
- 
-Test output: 
+```
+
+### Example Output
+```
 Track 1:
-09:00AM Writing Fast Tests Against Enterprise Rails 60min
-10:00AM Overdoing it in Python 45min
-10:45AM Lua for the Masses 30min
-11:15AM Ruby Errors from Mismatched Gem Versions 45min
-12:00PM Lunch
-01:00PM Ruby on Rails: Why We Should Move On 60min
-02:00PM Common Ruby Errors 45min
-02:45PM Pair Programming vs Noise 45min
-03:30PM Programming in the Boondocks of Seattle 30min
-04:00PM Ruby vs. Clojure for Back-End Development 30min
-04:30PM User Interface CSS in Rails Apps 30min
-05:00PM Networking Event
- 
-Track 2:
-09:00AM Communicating Over Distance 60min
-10:00AM Rails Magic 60min
-11:00AM Woah 30min
-11:30AM Sit Down and Write 30min
-12:00PM Lunch
-01:00PM Accounting-Driven Development 45min
-01:45PM Clojure Ate Scala (on my project) 45min
-02:30PM A World Without HackerNews 30min
-03:00PM Ruby on Rails Legacy App Maintenance 60min
-04:00PM Rails for Python Developers lightning
-05:00PM Networking Event
+09:00 AM Writing Fast Tests Against Enterprise Rails
+10:00 AM Overdoing it in Python
+10:45 AM Lua for the Masses
+11:15 AM Ruby Errors from Mismatched Gem Versions
+12:00 PM Lunch
+01:00 PM Rails for Python Developers
+04:00 PM Network
+```
+
+### Running the Scheduler
+1. Create an input file (e.g., `input.txt`) with the event list.
+2. Initialize the `ConferenceManager` with the file path:
+   ```python
+   from schedule import ConferenceManager
+
+   c = ConferenceManager('input.txt')
+   c.schedule(c.talk_list)
+   c.print_output()
+   ```
+
+## 3. Key Features
+1. Automatically schedules events into morning and evening sessions.
+2. Handles varying event durations and ensures they fit within session constraints.
+3. Includes networking and lunch breaks in the schedule.
+4. Flexible design to handle unscheduled events in subsequent days.
+
+## 4. Dependencies
+- Python 3.x
+
+## 5. Future Improvements
+1. Add support for customizing session durations.
+2. Optimize the scheduling algorithm for efficiency with larger datasets.
+3. Improve error handling for invalid input formats.
+
